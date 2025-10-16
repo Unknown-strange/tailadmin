@@ -41,10 +41,22 @@
                   Enter your email and password to sign in!
                 </p>
               </div>
+
+              <!-- Error Alert -->
+              <div
+                v-if="errorMessage"
+                class="mb-4 p-4 rounded-lg bg-error-50 border border-error-200 dark:bg-error-900/20 dark:border-error-800"
+              >
+                <p class="text-sm text-error-600 dark:text-error-400">{{ errorMessage }}</p>
+              </div>
+
               <div>
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
                   <button
-                    class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                    type="button"
+                    @click="handleGoogleSignIn"
+                    :disabled="isLoading"
+                    class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
                   >
                     <svg
                       width="20"
@@ -73,7 +85,10 @@
                     Sign in with Google
                   </button>
                   <button
-                    class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                    type="button"
+                    @click="handleXSignIn"
+                    :disabled="isLoading"
+                    class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
                   >
                     <svg
                       width="21"
@@ -87,7 +102,6 @@
                         d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z"
                       />
                     </svg>
-
                     Sign in with X
                   </button>
                 </div>
@@ -117,7 +131,9 @@
                         id="email"
                         name="email"
                         placeholder="info@gmail.com"
-                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                        required
+                        :disabled="isLoading"
+                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                       />
                     </div>
                     <!-- Password -->
@@ -134,7 +150,9 @@
                           :type="showPassword ? 'text' : 'password'"
                           id="password"
                           placeholder="Enter your password"
-                          class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                          required
+                          :disabled="isLoading"
+                          class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                         />
                         <span
                           @click="togglePasswordVisibility"
@@ -187,7 +205,7 @@
                               v-model="keepLoggedIn"
                               type="checkbox"
                               id="keepLoggedIn"
-                              class="sr-only"
+                              :disabled="isLoading"
                             />
                             <div
                               :class="
@@ -229,9 +247,11 @@
                     <div>
                       <button
                         type="submit"
-                        class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                        :disabled="isLoading"
+                        class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Sign In
+                        <span v-if="!isLoading">Sign In</span>
+                        <span v-else>Signing in...</span>
                       </button>
                     </div>
                   </div>
@@ -259,7 +279,7 @@
             <common-grid-shape />
             <div class="flex flex-col items-center max-w-xs">
               <router-link to="/" class="block mb-4">
-                <img width="{231}" height="{48}" src="/images/logo/auth-logo.svg" alt="Logo" />
+                <img width="231" height="48" src="/images/logo/auth-logo.svg" alt="Logo" />
               </router-link>
               <p class="text-center text-gray-400 dark:text-white/60">
                 Free and Open-Source Tailwind CSS Admin Dashboard Template
@@ -274,23 +294,89 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
+import api from '@/services/api'
+
+const router = useRouter()
+
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const keepLoggedIn = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
 
-const handleSubmit = () => {
-  // Handle form submission
-  console.log('Form submitted', {
-    email: email.value,
-    password: password.value,
-    keepLoggedIn: keepLoggedIn.value,
-  })
+const handleSubmit = async () => {
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    const response = await api.post('/auth/signin', {
+      email: email.value,
+      password: password.value,
+    })
+
+    const { token, user } = response.data
+
+    // Store token and user data
+    localStorage.setItem('auth_token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+
+    // Store "keep me logged in" preference
+    if (keepLoggedIn.value) {
+      localStorage.setItem('keep_logged_in', 'true')
+    }
+
+    // Redirect to dashboard
+    router.push('/dashboard')
+  } catch (error: any) {
+    // Handle specific error messages from API
+    if (error.response?.data?.message) {
+      errorMessage.value = error.response.data.message
+    } else if (error.response?.status === 401) {
+      errorMessage.value = 'Invalid email or password'
+    } else if (error.response?.status === 422) {
+      errorMessage.value = 'Please check your input and try again'
+    } else {
+      errorMessage.value = 'An error occurred. Please try again later.'
+    }
+    console.error('Sign in error:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handleGoogleSignIn = async () => {
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    // Redirect to Google OAuth endpoint
+    // Replace with your actual Google OAuth redirect URL
+    window.location.href = ${import.meta.env.VITE_API_URL}/auth/google
+  } catch (error) {
+    errorMessage.value = 'Google sign in is currently unavailable'
+    isLoading.value = false
+  }
+}
+
+const handleXSignIn = async () => {
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    // Redirect to X (Twitter) OAuth endpoint
+    // Replace with your actual X OAuth redirect URL
+    window.location.href = ${import.meta.env.VITE_API_URL}/auth/x
+  } catch (error) {
+    errorMessage.value = 'X sign in is currently unavailable'
+    isLoading.value = false
+  }
 }
 </script>

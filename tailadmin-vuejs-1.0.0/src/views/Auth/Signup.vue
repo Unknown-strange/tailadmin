@@ -41,10 +41,23 @@
                 Enter your email and password to sign up!
               </p>
             </div>
+            
+            <!-- Error Alert -->
+            <div v-if="errorMessage" class="p-4 mb-5 text-sm text-red-800 bg-red-100 rounded-lg dark:bg-red-900/20 dark:text-red-400">
+              {{ errorMessage }}
+            </div>
+
+            <!-- Success Alert -->
+            <div v-if="successMessage" class="p-4 mb-5 text-sm text-green-800 bg-green-100 rounded-lg dark:bg-green-900/20 dark:text-green-400">
+              {{ successMessage }}
+            </div>
+
             <div>
               <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
                 <button
-                  class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                  @click="handleGoogleSignup"
+                  :disabled="isLoading"
+                  class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg
                     width="20"
@@ -73,7 +86,9 @@
                   Sign up with Google
                 </button>
                 <button
-                  class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                  @click="handleXSignup"
+                  :disabled="isLoading"
+                  class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg
                     width="21"
@@ -87,7 +102,6 @@
                       d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z"
                     />
                   </svg>
-
                   Sign up with X
                 </button>
               </div>
@@ -118,8 +132,11 @@
                         id="fname"
                         name="fname"
                         placeholder="Enter your first name"
-                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                        :disabled="isLoading"
+                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        :class="{'border-red-500': errors.firstName}"
                       />
+                      <p v-if="errors.firstName" class="mt-1 text-xs text-red-500">{{ errors.firstName }}</p>
                     </div>
                     <!-- Last Name -->
                     <div class="sm:col-span-1">
@@ -135,8 +152,11 @@
                         id="lname"
                         name="lname"
                         placeholder="Enter your last name"
-                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                        :disabled="isLoading"
+                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        :class="{'border-red-500': errors.lastName}"
                       />
+                      <p v-if="errors.lastName" class="mt-1 text-xs text-red-500">{{ errors.lastName }}</p>
                     </div>
                   </div>
                   <!-- Email -->
@@ -153,8 +173,11 @@
                       id="email"
                       name="email"
                       placeholder="Enter your email"
-                      class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                      :disabled="isLoading"
+                      class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      :class="{'border-red-500': errors.email}"
                     />
+                    <p v-if="errors.email" class="mt-1 text-xs text-red-500">{{ errors.email }}</p>
                   </div>
                   <!-- Password -->
                   <div>
@@ -170,7 +193,9 @@
                         :type="showPassword ? 'text' : 'password'"
                         id="password"
                         placeholder="Enter your password"
-                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                        :disabled="isLoading"
+                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        :class="{'border-red-500': errors.password}"
                       />
                       <span
                         @click="togglePasswordVisibility"
@@ -210,6 +235,7 @@
                         </svg>
                       </span>
                     </div>
+                    <p v-if="errors.password" class="mt-1 text-xs text-red-500">{{ errors.password }}</p>
                   </div>
                   <!-- Checkbox -->
                   <div>
@@ -223,6 +249,7 @@
                             v-model="agreeToTerms"
                             type="checkbox"
                             id="checkboxLabelOne"
+                            :disabled="isLoading"
                             class="sr-only"
                           />
                           <div
@@ -261,15 +288,24 @@
                           <span class="text-gray-800 dark:text-white"> Privacy Policy </span>
                         </p>
                       </label>
+                      <p v-if="errors.agreeToTerms" class="mt-1 text-xs text-red-500">{{ errors.agreeToTerms }}</p>
                     </div>
                   </div>
                   <!-- Button -->
                   <div>
                     <button
                       type="submit"
-                      class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                      :disabled="isLoading"
+                      class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Sign Up
+                      <span v-if="!isLoading">Sign Up</span>
+                      <span v-else class="flex items-center gap-2">
+                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Signing up...
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -313,7 +349,10 @@
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import api from '@/services/api' // Adjust the path to your api service
+
+const router = useRouter()
 
 const firstName = ref('')
 const lastName = ref('')
@@ -321,19 +360,126 @@ const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const agreeToTerms = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+
+const errors = ref({
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  agreeToTerms: ''
+})
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
 
-const handleSubmit = () => {
-  // Implement form submission logic here
-  console.log('Form submitted', {
-    firstName: firstName.value,
-    lastName: lastName.value,
-    email: email.value,
-    password: password.value,
-    agreeToTerms: agreeToTerms.value,
-  })
+const validateForm = () => {
+  let isValid = true
+  errors.value = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    agreeToTerms: ''
+  }
+
+  if (!firstName.value.trim()) {
+    errors.value.firstName = 'First name is required'
+    isValid = false
+  }
+
+  if (!lastName.value.trim()) {
+    errors.value.lastName = 'Last name is required'
+    isValid = false
+  }
+
+  if (!email.value.trim()) {
+    errors.value.email = 'Email is required'
+    isValid = false
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    errors.value.email = 'Please enter a valid email address'
+    isValid = false
+  }
+
+  if (!password.value) {
+    errors.value.password = 'Password is required'
+    isValid = false
+  } else if (password.value.length < 8) {
+    errors.value.password = 'Password must be at least 8 characters'
+    isValid = false
+  }
+
+  if (!agreeToTerms.value) {
+    errors.value.agreeToTerms = 'You must agree to the terms and conditions'
+    isValid = false
+  }
+
+  return isValid
+}
+
+const handleSubmit = async () => {
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  if (!validateForm()) {
+    return
+  }
+
+  isLoading.value = true
+
+  try {
+    const response = await api.post('/auth/signup', {
+      first_name: firstName.value,
+      last_name: lastName.value,
+      email: email.value,
+      password: password.value
+    })
+
+    // Store token and user data
+    if (response.data.token) {
+      localStorage.setItem('auth_token', response.data.token)
+    }
+    if (response.data.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+    }
+
+    successMessage.value = 'Account created successfully! Redirecting...'
+    
+    // Redirect to dashboard after 1.5 seconds
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 1500)
+
+  } catch (error: any) {
+    if (error.response?.data?.message) {
+      errorMessage.value = error.response.data.message
+    } else if (error.response?.data?.errors) {
+      // Handle validation errors from backend
+      const backendErrors = error.response.data.errors
+      errorMessage.value = Object.values(backendErrors).flat().join(', ')
+    } else {
+      errorMessage.value = 'An error occurred during signup. Please try again.'
+    }
+    console.error('Signup error:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handleGoogleSignup = () => {
+  // Implement Google OAuth signup
+  console.log('Google signup clicked')
+  // Redirect to your backend OAuth endpoint
+  // window.location.href = ${import.meta.env.VITE_API_URL}/auth/google
+}
+
+const handleXSignup = () => {
+  // Implement X (Twitter) OAuth signup
+  console.log('X signup clicked')
+  // Redirect to your backend OAuth endpoint
+  // window.location.href = ${import.meta.env.VITE_API_URL}/auth/twitter
 }
 </script>
