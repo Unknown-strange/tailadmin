@@ -1,0 +1,9 @@
+{
+    "require": {
+        "laravel/sanctum": "^4.2",
+        "spatie/laravel-permission": "^6.21"
+    },
+    "require-dev": {
+        "laravel/breeze": "^2.3"
+    }
+}
