@@ -1,85 +1,118 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+namespace App\Http\Controllers;
 
-Route::post('/register', [AuthController::class, 'register']);
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use App\Models\User;
-
-Route::get('/database-info', function () {
-    return response()->json([
-        'status' => 'Database is working!',
-        'tables' => DB::select("SELECT name FROM sqlite_master WHERE type='table'"),
-        'total_users' => User::count(),
-        'migrations_run' => DB::table('migrations')->get()
-    ]);
-});
-
-Route::get('/create-test-user', function () {
-    $user = User::create([
-        'name' => 'Test User ' . time(),
-        'email' => 'test' . time() . '@example.com',
-        'password' => bcrypt('password123')
-    ]);
-    
-    return response()->json([
-        'message' => 'Test user created successfully!',
-        'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email
-        ]
-    ]);
-});
-
-Route::get('/users', function () {
-    $users = User::all();
-    
-    return response()->json([
-        'users' => $users
-    ]);
-});
-<?php
-
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
-Route::get('/database-info', function () {
-    return response()->json([
-        'status' => 'Database is working!',
-        'tables' => DB::select("SELECT name FROM sqlite_master WHERE type='table'"),
-        'total_users' => User::count(),
-        'migrations_run' => DB::table('migrations')->get()
-    ]);
-});
+class AuthController extends Controller
+{
+    /**
+     * Register a new user
+     */
+    public function register(Request $request)
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed'
+        ]);
 
-Route::get('/create-test-user', function () {
-    $user = User::create([
-        'name' => 'Test User ' . time(),
-        'email' => 'test' . time() . '@example.com',
-        'password' => bcrypt('password123')
-    ]);
-    
-    return response()->json([
-        'message' => 'Test user created successfully!',
-        'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email
-        ]
-    ]);
-});
+        // Check if validation fails
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
-Route::get('/users', function () {
-    $users = User::all();
-    
-    return response()->json([
-        'users' => $users
-    ]);
-});
+        // Create the user
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password)
+        ]);
+
+        // Create a token for the user
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'User registered successfully',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at
+            ],
+            'token' => $token
+        ], 201);
+    }
+
+    /**
+     * Login a user
+     */
+    public function login(Request $request)
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string'
+        ]);
+
+        // Check if validation fails
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Find the user by email
+        $user = User::where('email', $request->email)->first();
+
+        // Check if user exists and password is correct
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'Invalid credentials'
+            ], 401);
+        }
+
+        // Create a token for the user
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login successful',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email
+            ],
+            'token' => $token
+        ], 200);
+    }
+
+    /**
+     * Logout a user (revoke token)
+     */
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully'
+        ], 200);
+    }
+
+    /**
+     * Get the authenticated user
+     */
+    public function user(Request $request)
+    {
+        return response()->json([
+            'user' => $request->user()
+        ], 200);
+    }
+}
