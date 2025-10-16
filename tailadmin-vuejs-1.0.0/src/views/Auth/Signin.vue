@@ -359,7 +359,7 @@ const handleGoogleSignIn = async () => {
   try {
     // Redirect to Google OAuth endpoint
     // Replace with your actual Google OAuth redirect URL
-    window.location.href = ${import.meta.env.VITE_API_URL}/auth/google
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`
   } catch (error) {
     errorMessage.value = 'Google sign in is currently unavailable'
     isLoading.value = false
@@ -373,7 +373,7 @@ const handleXSignIn = async () => {
   try {
     // Redirect to X (Twitter) OAuth endpoint
     // Replace with your actual X OAuth redirect URL
-    window.location.href = ${import.meta.env.VITE_API_URL}/auth/x
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/x`
   } catch (error) {
     errorMessage.value = 'X sign in is currently unavailable'
     isLoading.value = false
