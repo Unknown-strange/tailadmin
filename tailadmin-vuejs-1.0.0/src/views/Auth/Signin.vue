@@ -334,7 +334,7 @@ const handleSubmit = async () => {
     }
 
     // Redirect to dashboard
-    router.push('/dashboard')
+    router.push('/')
   } catch (error: any) {
     // Handle specific error messages from API
     if (error.response?.data?.message) {

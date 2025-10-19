@@ -450,7 +450,7 @@ const handleSubmit = async () => {
     
     // Redirect to dashboard after 1.5 seconds
     setTimeout(() => {
-      router.push('/dashboard')
+      router.push('/signin')
     }, 1500)
 
   } catch (error: any) {

@@ -57,7 +57,7 @@ class AuthController extends Controller
         ], 401);
     }
 
-    $token = $user->createToken('auth_token')->plainTextToken;
+    $token = $user->createToken('auth_token', expiresAt: now()->addMinutes(2))->plainTextToken;
 
     return response()->json([
         'message' => 'Login successful',

@@ -33,7 +33,6 @@
             :to="item.href"
             class="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
           >
-            <!-- SVG icon would go here -->
             <component
               :is="item.icon"
               class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300"
@@ -42,16 +41,16 @@
           </router-link>
         </li>
       </ul>
-      <router-link
-        to="/signin"
+      <button
         @click="signOut"
-        class="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+        :disabled="isLoggingOut"
+        class="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed w-full text-left"
       >
         <LogoutIcon
           class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300"
         />
-        Sign out
-      </router-link>
+        {{ isLoggingOut ? 'Signing out...' : 'Sign out' }}
+      </button>
     </div>
     <!-- Dropdown End -->
   </div>
@@ -60,10 +59,13 @@
 <script setup lang="ts">
 import { ChevronDownIcon, InfoCircleIcon, LogoutIcon, SettingsIcon, UserCircleIcon } from '@/icons'
 import { onMounted, onUnmounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { useRouter } from 'vue-router'
+import api from '@/services/api'
 
+const router = useRouter()
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
+const isLoggingOut = ref(false)
 
 const menuItems = [
   { href: '/profile', icon: UserCircleIcon, text: 'Edit profile' },
@@ -79,10 +81,25 @@ const closeDropdown = () => {
   dropdownOpen.value = false
 }
 
-const signOut = () => {
-  // Implement sign out logic here
-  console.log('Signing out...')
+const signOut = async () => {
+  isLoggingOut.value = true
   closeDropdown()
+
+  try {
+    // Call backend logout endpoint
+    await api.post('/auth/logout')
+  } catch (error) {
+    console.error('Logout error:', error)
+  } finally {
+    // Clear local storage
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('keep_logged_in')
+
+    // Redirect to signin
+    router.push('/signin')
+    isLoggingOut.value = false
+  }
 }
 
 const handleClickOutside = (event: Event) => {

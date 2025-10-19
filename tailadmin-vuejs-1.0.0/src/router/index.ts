@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { setupAuthGuard } from './authGuard'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -140,8 +141,16 @@ const router = createRouter({
         title: 'Signup',
       },
     },
+
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('@/views/Auth/forgetpassword.vue'),
+    },
   ],
 })
+
+setupAuthGuard(router)
 
 export default router
 
